@@ -17,41 +17,42 @@ module.exports = async (logSources, printer) => {
     // replace with new log Entry
     let newEntry = await addIndex(logSources[currIndex], currIndex);
     if (newEntry) {
+      // merge new log Entry into list
       latestEntries = merge(latestEntries, newEntry);
     }
   }
   printer.done();
 }
-  // sort from oldest to newest
-  function byDate(a, b) {
-    return b.date - a.date;
-  };
-  
-  // add index to logEntry
-  async function addIndex(logSource, index) {
-    let logEntry = await logSource.popAsync()
-    return logEntry ? Object.assign({index}, logEntry) : false;
-  }
-  
-  // merge new logEntry with latest logEntries
-  function merge(latestEntries, newEntry, start = 0, end = latestEntries.length - 1) {
-    let newEntryArr = [newEntry];
-    let merged = [];
-    let k = 0;
-    let i = 0;
-    let j = 0;
-    while (i < latestEntries.length && j < newEntryArr.length) {
-      if (latestEntries[i].date > newEntryArr[j].date) {
-        merged[k++] = latestEntries[i++];
-      } else {
-        merged[k++] = newEntryArr[j++];
-      }
-    }
-    while (i < latestEntries.length) {
+// sort from newest (largest) to oldest (smallest)
+const byDate = (a, b) => {
+  return b.date - a.date;
+};
+
+// add index to logEntry
+const addIndex = async (logSource, index) => {
+  let logEntry = await logSource.popAsync()
+  return logEntry ? Object.assign({index}, logEntry) : false;
+}
+
+// merge new logEntry with latest logEntries
+const merge = (latestEntries, newEntry, start = 0, end = latestEntries.length - 1) => {
+  const newEntryArr = [newEntry];
+  const merged = [];
+  let k = 0;
+  let i = 0;
+  let j = 0;
+  while (i < latestEntries.length && j < newEntryArr.length) {
+    if (latestEntries[i].date > newEntryArr[j].date) {
       merged[k++] = latestEntries[i++];
-    }
-    while (j < newEntryArr.length) {
+    } else {
       merged[k++] = newEntryArr[j++];
     }
-    return merged;
+  }
+  while (i < latestEntries.length) {
+    merged[k++] = latestEntries[i++];
+  }
+  while (j < newEntryArr.length) {
+    merged[k++] = newEntryArr[j++];
+  }
+  return merged;
 }

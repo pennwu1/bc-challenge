@@ -16,27 +16,28 @@ module.exports = (logSources, printer) => {
     // replace with new log Entry
     let newEntry = addIndex(logSources[currIndex], currIndex);
     if (newEntry) {
+      // merge new log Entry into list
       latestEntries = merge(latestEntries, newEntry);
     }
   }
   printer.done();
 }
 
-// sort from oldest to newest
-function byDate(a, b) {
+// sort from newest (largest) to oldest (smallest)
+const byDate = (a, b) => {
   return b.date - a.date;
 };
 
 // add index to logEntry
-function addIndex(logSource, index) {
+const addIndex = (logSource, index) => {
   let logEntry = logSource.pop();
   return logEntry ? Object.assign({index}, logEntry) : false;
 }
 
 // merge new logEntry with latest logEntries
-function merge(latestEntries, newEntry, start = 0, end = latestEntries.length - 1) {
-  let newEntryArr = [newEntry];
-  let merged = [];
+const merge = (latestEntries, newEntry, start = 0, end = latestEntries.length - 1) => {
+  const newEntryArr = [newEntry];
+  const merged = [];
   let k = 0;
   let i = 0;
   let j = 0;
